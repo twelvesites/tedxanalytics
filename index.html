@@ -54,17 +54,26 @@
     const startTime = Date.now();
     const visitRef = db.ref('visits');
 
-    // Generate a random visitor ID (so you can track multiple opens)
-    const visitorId = 'visitor_' + Math.random().toString(36).substring(2, 10);
+    // ---- Persist visitor ID across page loads ----
+    let visitorId = localStorage.getItem('visitorId');
+    if (!visitorId) {
+      visitorId = 'visitor_' + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem('visitorId', visitorId);
+    }
+
+    // Common event data
+    const commonData = {
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language
+    };
 
     // Log initial visit
     visitRef.child(visitorId).push({
       type: 'page_open',
       time: new Date().toISOString(),
-      url: window.location.href,
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      language: navigator.language
+      ...commonData
     });
 
     // ---- TRACK TIME SPENT ----
@@ -73,11 +82,8 @@
       visitRef.child(visitorId).push({
         type: 'time_spent',
         time: new Date().toISOString(),
-        url: window.location.href,
         milliseconds: timeSpent,
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language
+        ...commonData
       });
     });
 
@@ -88,10 +94,7 @@
         type: 'click',
         time: new Date().toISOString(),
         element: target,
-        url: window.location.href,
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language
+        ...commonData
       });
     });
   </script>
