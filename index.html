@@ -39,13 +39,13 @@
     // ---- FIREBASE CONFIG ----
     const firebaseConfig = {
       apiKey: "AIzaSyDob9nbpu0Y9ebCmxwHBTCyFFCzSjgNFLs",
-  authDomain: "confession-ies.firebaseapp.com",
-  databaseURL: "https://confession-ies-default-rtdb.firebaseio.com",
-  projectId: "confession-ies",
-  storageBucket: "confession-ies.firebasestorage.app",
-  messagingSenderId: "705171117795",
-  appId: "1:705171117795:web:4aa165b3b071a0d6b197d6",
-  measurementId: "G-9347YMJ01Z"
+      authDomain: "confession-ies.firebaseapp.com",
+      databaseURL: "https://confession-ies-default-rtdb.firebaseio.com",
+      projectId: "confession-ies",
+      storageBucket: "confession-ies.firebasestorage.app",
+      messagingSenderId: "705171117795",
+      appId: "1:705171117795:web:4aa165b3b071a0d6b197d6",
+      measurementId: "G-9347YMJ01Z"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -62,7 +62,9 @@
       type: 'page_open',
       time: new Date().toISOString(),
       url: window.location.href,
-      userAgent: navigator.userAgent
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language
     });
 
     // ---- TRACK TIME SPENT ----
@@ -72,7 +74,10 @@
         type: 'time_spent',
         time: new Date().toISOString(),
         url: window.location.href,
-        milliseconds: timeSpent
+        milliseconds: timeSpent,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language
       });
     });
 
@@ -83,7 +88,10 @@
         type: 'click',
         time: new Date().toISOString(),
         element: target,
-        url: window.location.href
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language
       });
     });
   </script>
