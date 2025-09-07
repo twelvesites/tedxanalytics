@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+    h1 {
+      color: #e62b1e;
+    }
+    p {
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div>
+    <h1>Project Viewer</h1>
+    <p>Your visit is being tracked for analytics 🖥️</p>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // ---- FIREBASE CONFIG ----
+    const firebaseConfig = {
+      apiKey: "AIzaSyDob9nbpu0Y9ebCmxwHBTCyFFCzSjgNFLs",
+  authDomain: "confession-ies.firebaseapp.com",
+  databaseURL: "https://confession-ies-default-rtdb.firebaseio.com",
+  projectId: "confession-ies",
+  storageBucket: "confession-ies.firebasestorage.app",
+  messagingSenderId: "705171117795",
+  appId: "1:705171117795:web:4aa165b3b071a0d6b197d6",
+  measurementId: "G-9347YMJ01Z"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ---- TRACK VISIT ----
+    const startTime = Date.now();
+    const visitRef = db.ref('visits');
+
+    // Generate a random visitor ID (so you can track multiple opens)
+    const visitorId = 'visitor_' + Math.random().toString(36).substring(2, 10);
+
+    // Log initial visit
+    visitRef.child(visitorId).push({
+      type: 'page_open',
+      time: new Date().toISOString(),
+      url: window.location.href,
+      userAgent: navigator.userAgent
+    });
+
+    // ---- TRACK TIME SPENT ----
+    window.addEventListener('beforeunload', function() {
+      const timeSpent = Date.now() - startTime;
+      visitRef.child(visitorId).push({
+        type: 'time_spent',
+        time: new Date().toISOString(),
+        url: window.location.href,
+        milliseconds: timeSpent
+      });
+    });
+
+    // ---- OPTIONAL: Track clicks ----
+    document.addEventListener('click', function(e) {
+      const target = e.target.tagName + (e.target.id ? '#' + e.target.id : '');
+      visitRef.child(visitorId).push({
+        type: 'click',
+        time: new Date().toISOString(),
+        element: target,
+        url: window.location.href
+      });
+    });
+  </script>
+
+</body>
+</html>
