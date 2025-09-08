@@ -1,6 +1,5 @@
 // tracker.js
 (function() {
-  // ---- FIREBASE SDK ----
   const scriptApp = document.createElement('script');
   scriptApp.src = "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js";
   scriptApp.onload = () => {
@@ -11,17 +10,19 @@
   };
   document.head.appendChild(scriptApp);
 
-  function getDeviceModel(uaString) {
-    // Android model numbers appear after "Android <version>;"
-    const androidMatch = uaString.match(/Android\s[\d.]+;\s([^)]+)\)/i);
+  function getDeviceModel(ua) {
+    const androidMatch = ua.match(/Android\s[\d.]+;\s([^)]+)\)/i);
     if (androidMatch) return androidMatch[1].trim();
-
-    // iPhone/iPad detection (cannot get exact model)
-    if (/iPhone/.test(uaString)) return "iPhone";
-    if (/iPad/.test(uaString)) return "iPad";
-
-    // Fallback for desktop or unknown
+    if (/iPhone/.test(ua)) return "iPhone";
+    if (/iPad/.test(ua)) return "iPad";
     return "Unknown Device";
+  }
+
+  function getDeviceType() {
+    const ua = navigator.userAgent;
+    if (/Mobi|Android/i.test(ua)) return "Mobile";
+    if (/Tablet|iPad/i.test(ua)) return "Tablet";
+    return "Desktop";
   }
 
   function initTracker() {
@@ -41,21 +42,21 @@
     const startTime = Date.now();
     const visitRef = db.ref('visits');
 
-    // Persist visitor ID
     let visitorId = localStorage.getItem('visitorId');
     if (!visitorId) {
       visitorId = 'visitor_' + Math.random().toString(36).substring(2, 10);
       localStorage.setItem('visitorId', visitorId);
     }
 
-    const deviceModel = getDeviceModel(navigator.userAgent);
-
     const commonData = {
-      url: window.location.href,
+      pageURL: window.location.href,
       userAgent: navigator.userAgent,
       platform: navigator.platform,
       language: navigator.language,
-      deviceModel: deviceModel
+      deviceModel: getDeviceModel(navigator.userAgent),
+      deviceType: getDeviceType(),
+      os: navigator.platform,
+      screenResolution: `${window.screen.width}x${window.screen.height}`
     };
 
     // Page open
