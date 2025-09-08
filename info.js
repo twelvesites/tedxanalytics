@@ -11,17 +11,41 @@
   };
   document.head.appendChild(scriptApp);
 
-  function getDeviceModel(uaString) {
-    // Android model numbers appear after "Android <version>;"
-    const androidMatch = uaString.match(/Android\s[\d.]+;\s([^)]+)\)/i);
-    if (androidMatch) return androidMatch[1].trim();
+  // --- Device Info Helper ---
+  function getDeviceInfo() {
+    const ua = navigator.userAgent;
 
-    // iPhone/iPad detection (cannot get exact model)
-    if (/iPhone/.test(uaString)) return "iPhone";
-    if (/iPad/.test(uaString)) return "iPad";
+    // Device type
+    const deviceType = /Mobi|Android/i.test(ua) ? "Mobile" : "Desktop";
 
-    // Fallback for desktop or unknown
-    return "Unknown Device";
+    // OS
+    const os = navigator.platform || "Unknown";
+
+    // Browser
+    const browser = ua.match(/(Chrome|Firefox|Safari|Edge|Opera)/)?.[0] || "Unknown";
+
+    // Screen resolution
+    const screenResolution = `${window.screen.width}x${window.screen.height}`;
+
+    // Language
+    const language = navigator.language || "Unknown";
+
+    // Device model (Android/Apple)
+    let deviceModel = "Unknown Device";
+    const androidMatch = ua.match(/Android\s[\d.]+;\s([^)]+)\)/i);
+    if (androidMatch) deviceModel = androidMatch[1].trim();
+    else if (/iPhone/.test(ua)) deviceModel = "iPhone";
+    else if (/iPad/.test(ua)) deviceModel = "iPad";
+
+    return {
+      deviceType,
+      os,
+      browser,
+      screenResolution,
+      language,
+      deviceModel,
+      userAgent: ua
+    };
   }
 
   function initTracker() {
@@ -48,17 +72,9 @@
       localStorage.setItem('visitorId', visitorId);
     }
 
-    const deviceModel = getDeviceModel(navigator.userAgent);
+    const commonData = getDeviceInfo();
 
-    const commonData = {
-      url: window.location.href,
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      language: navigator.language,
-      deviceModel: deviceModel
-    };
-
-    // Page open
+    // Page open event
     visitRef.child(visitorId).push({
       type: 'page_open',
       time: new Date().toISOString(),
