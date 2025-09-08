@@ -15,22 +15,13 @@
   function getDeviceInfo() {
     const ua = navigator.userAgent;
 
-    // Device type
-    const deviceType = /Mobi|Android/i.test(ua) ? "Mobile" : "Desktop";
-
-    // OS
-    const os = navigator.platform || "Unknown";
-
-    // Browser
-    const browser = ua.match(/(Chrome|Firefox|Safari|Edge|Opera)/)?.[0] || "Unknown";
-
-    // Screen resolution
-    const screenResolution = `${window.screen.width}x${window.screen.height}`;
+    // Platform
+    const platform = navigator.platform || "Unknown";
 
     // Language
     const language = navigator.language || "Unknown";
 
-    // Device model (Android/Apple)
+    // Device model (Android/iOS)
     let deviceModel = "Unknown Device";
     const androidMatch = ua.match(/Android\s[\d.]+;\s([^)]+)\)/i);
     if (androidMatch) deviceModel = androidMatch[1].trim();
@@ -38,13 +29,10 @@
     else if (/iPad/.test(ua)) deviceModel = "iPad";
 
     return {
-      deviceType,
-      os,
-      browser,
-      screenResolution,
+      platform,
+      userAgent: ua,
       language,
-      deviceModel,
-      userAgent: ua
+      deviceModel
     };
   }
 
