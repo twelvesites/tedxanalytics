@@ -11,6 +11,19 @@
   };
   document.head.appendChild(scriptApp);
 
+  function getDeviceModel(uaString) {
+    // Android model numbers appear after "Android <version>;"
+    const androidMatch = uaString.match(/Android\s[\d.]+;\s([^)]+)\)/i);
+    if (androidMatch) return androidMatch[1].trim();
+
+    // iPhone/iPad detection (cannot get exact model)
+    if (/iPhone/.test(uaString)) return "iPhone";
+    if (/iPad/.test(uaString)) return "iPad";
+
+    // Fallback for desktop or unknown
+    return "Unknown Device";
+  }
+
   function initTracker() {
     const firebaseConfig = {
       apiKey: "AIzaSyDob9nbpu0Y9ebCmxwHBTCyFFCzSjgNFLs",
@@ -35,11 +48,14 @@
       localStorage.setItem('visitorId', visitorId);
     }
 
+    const deviceModel = getDeviceModel(navigator.userAgent);
+
     const commonData = {
       url: window.location.href,
       userAgent: navigator.userAgent,
       platform: navigator.platform,
-      language: navigator.language
+      language: navigator.language,
+      deviceModel: deviceModel
     };
 
     // Page open
