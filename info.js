@@ -11,51 +11,17 @@
   };
   document.head.appendChild(scriptApp);
 
-  function getDeviceInfo() {
-    const ua = navigator.userAgent;
-    const platform = navigator.platform || "Unknown";
-    const language = navigator.language || "Unknown";
+  function getDeviceModel(uaString) {
+    // Android model numbers appear after "Android <version>;"
+    const androidMatch = uaString.match(/Android\s[\d.]+;\s([^)]+)\)/i);
+    if (androidMatch) return androidMatch[1].trim();
 
-    // Device type
-    const deviceType = /Mobi|Android/i.test(ua) ? "Mobile" : "Desktop";
+    // iPhone/iPad detection (cannot get exact model)
+    if (/iPhone/.test(uaString)) return "iPhone";
+    if (/iPad/.test(uaString)) return "iPad";
 
-    // OS detection
-    const os = /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iOS" : platform;
-
-    // Browser detection
-    const browser = ua.match(/(Chrome|Firefox|Safari|Edge|Opera)/)?.[0] || "Unknown";
-
-    // Screen resolution
-    const screenResolution = `${window.screen.width}x${window.screen.height}`;
-
-    // Device model detection
-    let deviceModel = "Unknown Device";
-    let androidMatch = ua.match(/Android\s[\d.]+;\s([^)]+)\)/i);
-    if (androidMatch) deviceModel = androidMatch[1].trim();
-    else if (/iPhone/.test(ua)) deviceModel = "iPhone";
-    else if (/iPad/.test(ua)) deviceModel = "iPad";
-    else {
-      const parts = ua.split(';').map(s => s.trim());
-      deviceModel = parts[parts.length - 2] || "Unknown Device"; // fallback for weird WebViews
-    }
-
-    // Current page URL
-    const pageURL = window.location.href;
-
-    // Local time
-    const localTime = new Date().toLocaleString();
-
-    return {
-      pageURL,
-      localTime,
-      deviceType,
-      os,
-      browser,
-      screenResolution,
-      deviceModel,
-      language,
-      userAgent: ua
-    };
+    // Fallback for desktop or unknown
+    return "Unknown Device";
   }
 
   function initTracker() {
@@ -82,9 +48,17 @@
       localStorage.setItem('visitorId', visitorId);
     }
 
-    const commonData = getDeviceInfo();
+    const deviceModel = getDeviceModel(navigator.userAgent);
 
-    // Page open event
+    const commonData = {
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      deviceModel: deviceModel
+    };
+
+    // Page open
     visitRef.child(visitorId).push({
       type: 'page_open',
       time: new Date().toISOString(),
@@ -96,8 +70,8 @@
       const timeSpent = Date.now() - startTime;
       visitRef.child(visitorId).push({
         type: 'time_spent',
-        milliseconds: timeSpent,
         time: new Date().toISOString(),
+        milliseconds: timeSpent,
         ...commonData
       });
     });
@@ -107,8 +81,8 @@
       const target = e.target.tagName + (e.target.id ? '#' + e.target.id : '');
       visitRef.child(visitorId).push({
         type: 'click',
-        element: target,
         time: new Date().toISOString(),
+        element: target,
         ...commonData
       });
     });
